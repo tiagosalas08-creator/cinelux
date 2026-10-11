@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CineLux | Control de acceso</title>
+<script src="https://unpkg.com/html5-qrcode"></script>
+<style>
+:root{--bg:#080b14;--panel:#111827;--panel2:#171f30;--text:#f3f6ff;--muted:#9ba8c0;--gold:#f6c453;--blue:#6aa8ff;--green:#28d79a;--red:#ff5f72}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% -15%,#26304c 0%,#0b1020 45%,var(--bg) 75%);color:var(--text);font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;min-height:100vh}
+header{border-bottom:1px solid #283249;background:#080b14cc;backdrop-filter:blur(12px);padding:18px clamp(16px,4vw,48px);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:44px;height:44px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,#f6c453,#ed8b35);color:#111827;font-size:24px;box-shadow:0 0 28px #f6c45335}
+.brand h1{font-size:1.25rem;margin:0;letter-spacing:.12em}.brand p{margin:3px 0 0;color:var(--muted);font-size:.76rem;letter-spacing:.15em;text-transform:uppercase}
+.pill{border:1px solid #34415a;border-radius:999px;padding:8px 12px;color:#d6e0f4;font-size:.8rem;display:flex;align-items:center;gap:8px}.dot{width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 12px var(--green)}
+main{width:min(1180px,100%);margin:auto;padding:28px 18px 42px}
+.hero{text-align:center;margin:10px auto 28px;max-width:720px}.eyebrow{color:var(--gold);letter-spacing:.22em;font-size:.75rem;font-weight:800;text-transform:uppercase}.hero h2{font-size:clamp(1.8rem,5vw,3rem);margin:9px 0;background:linear-gradient(100deg,#fff 25%,#f6c453 75%);-webkit-background-clip:text;background-clip:text;color:transparent}.hero p{color:var(--muted);margin:0}
+.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);gap:20px;align-items:start}
+.panel{background:linear-gradient(150deg,#151d2e,#0f1522);border:1px solid #2b354a;border-radius:20px;box-shadow:0 18px 60px #0005;overflow:hidden}.panel-head{padding:18px 20px;border-bottom:1px solid #293248;display:flex;justify-content:space-between;align-items:center;gap:12px}.panel-head h3{margin:0;font-size:1rem}.panel-head span{color:var(--muted);font-size:.8rem}.pad{padding:20px}
+#reader{width:100%;min-height:220px;border:1px dashed #394660;border-radius:15px;overflow:hidden;background:#080d17;display:flex;align-items:center;justify-content:center}
+#reader:empty:before{content:"La cámara aparecerá aquí";color:#75839d;font-size:.9rem}
+#reader video{border-radius:12px;object-fit:cover}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+button{font:inherit;font-weight:750;border:0;border-radius:11px;padding:12px 16px;cursor:pointer;transition:transform .15s,filter .15s}
+button:hover{filter:brightness(1.08);transform:translateY(-1px)}button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.primary{background:linear-gradient(135deg,#f6c453,#ee9e37);color:#141827;flex:1}.secondary{background:#252f43;color:#e5edff;border:1px solid #3a4760}.note{font-size:.8rem;color:var(--muted);line-height:1.55;margin:14px 0 0}
+.manual{display:flex;gap:9px;margin-top:16px}.manual input{min-width:0;flex:1;background:#0a101c;border:1px solid #36425a;border-radius:10px;padding:12px;color:white;font:inherit}.manual button{background:#283650;color:#fff}
+.status{display:none;margin-top:16px;border-radius:14px;padding:16px;border:1px solid #35425a;background:#101a2a}.status.show{display:block}.status.valid{border-color:#1d956e;background:#0d2a25}.status.invalid{border-color:#ba4558;background:#32151f}.status h4{font-size:1.12rem;margin:0 0 5px}.status p{margin:4px 0;color:#d2d9e7;overflow-wrap:anywhere}.status .sub{font-size:.8rem;color:#b2bfd3}
+.movie{display:flex;gap:15px;align-items:center}.poster{width:92px;height:126px;flex-shrink:0;border-radius:11px;background:linear-gradient(145deg,#292f51,#9a473c 50%,#e5b65c);display:grid;place-items:center;font-size:2.4rem;box-shadow:0 8px 24px #0005}.movie h3{margin:0 0 6px;font-size:1.1rem}.movie p{margin:4px 0;color:var(--muted);font-size:.87rem}.tag{display:inline-block;margin-top:8px;border:1px solid #5d4c2c;color:var(--gold);border-radius:6px;padding:4px 7px;font-size:.7rem;font-weight:800;letter-spacing:.1em}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.stat{background:#0b111e;border:1px solid #273248;border-radius:13px;padding:13px 10px}.stat span{display:block;color:var(--muted);font-size:.74rem}.stat strong{display:block;font-size:1.7rem;margin-top:5px}.stat:nth-child(2) strong{color:var(--green)}.stat:nth-child(3) strong{color:var(--red)}
+.demo{margin-top:20px}.demo h3{font-size:.9rem;margin:0 0 10px}.demo-buttons{display:flex;gap:8px;flex-wrap:wrap}.demo-buttons button{font-size:.8rem;padding:10px 12px}.demo-good{background:#123d34;color:#7ef0c6;border:1px solid #1c775e}.demo-bad{background:#3d1c27;color:#ff9baa;border:1px solid #87404e}
+.history{margin-top:20px}.history-list{padding:0 20px 16px}.empty{color:var(--muted);font-size:.85rem;padding:8px 0}.entry{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #263147;font-size:.83rem}.entry:last-child{border-bottom:0}.entry strong{display:block}.entry small{display:block;color:var(--muted);margin-top:4px}.result-pill{align-self:center;border-radius:999px;padding:5px 8px;font-size:.68rem;font-weight:800;white-space:nowrap}.ok{color:#78f0c4;background:#123d34}.no{color:#ff9baa;background:#3d1c27}
+footer{text-align:center;color:#6e7b94;font-size:.78rem;margin-top:25px;line-height:1.6}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.hero{margin-top:0}.pad{padding:16px}.panel-head{padding:16px}.poster{width:78px;height:108px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">🎬</div><div><h1>CINELUX</h1><p>Movie theater · Access control</p></div></div>
+  <div class="pill"><span class="dot"></span> SISTEMA DE PRUEBA ACTIVO</div>
+</header>
+<main>
+  <section class="hero"><div class="eyebrow">◆ Control de entradas ◆</div><h2>Tu película comienza aquí</h2><p>Escanea el código QR del boleto para comprobar el acceso al cine.</p></section>
+  <div class="grid">
+    <section class="panel">
+      <div class="panel-head"><h3>▦ Escáner de boletos</h3><span>LECTOR QR</span></div>
+      <div class="pad">
+        <div id="reader"></div>
+        <div class="actions">
+          <button class="primary" id="start">▶ Activar cámara</button>
+          <button class="secondary" id="stop" disabled>Detener</button>
+        </div>
+        <p class="note">Permite el acceso a la cámara cuando el navegador lo solicite. Para usar la cámara, abre esta página mediante HTTPS o en localhost.</p>
+        <div class="manual">
+          <input id="manualCode" placeholder="O escribe un código de prueba…" aria-label="Código QR de prueba">
+          <button id="checkManual">Validar</button>
+        </div>
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+        <div class="demo">
+          <h3>PRUEBA RÁPIDA · SIMULAR UN BOLETO</h3>
+          <div class="demo-buttons">
+            <button class="demo-good" id="good">✓ Probar boleto válido</button>
+            <button class="demo-bad" id="bad">✕ Probar boleto inválido</button>
+            <button class="secondary" id="reset">Reiniciar estadísticas</button>
+          </div>
+          <p class="note">Códigos de prueba válidos: CINE-VALIDO-001, CINE-VALIDO-002 y CINE-VALIDO-003. También puedes generar un QR que contenga uno de esos textos y escanearlo. Este modo es una demostración local, no valida boletos reales vendidos por un cine.</p>
+        </div>
+      </div>
+    </section>
+    <div>
+      <section class="panel">
+        <div class="panel-head"><h3>🎟 Información de la función</h3><span>SESIÓN ACTUAL</span></div>
+        <div class="pad">
+          <div class="movie"><div class="poster">🍿</div><div><h3>Noche de estreno</h3><p>Función de demostración</p><p>🕒 7:30 p. m.</p><p>📍 Sala 04 · Asiento asignado en boleto</p><span class="tag">PREMIERE</span></div></div>
+          <div class="stats">
+            <div class="stat"><span>Verificados</span><strong id="total">0</strong></div>
+            <div class="stat"><span>Permitidos</span><strong id="accepted">0</strong></div>
+            <div class="stat"><span>Rechazados</span><strong id="rejected">0</strong></div>
+          </div>
+        </div>
+      </section>
+      <section class="panel history">
+        <div class="panel-head"><h3>Actividad reciente</h3><span id="historyCount">0 registros</span></div>
+        <div class="history-list" id="history"><div class="empty">Todavía no hay entradas escaneadas.</div></div>
+      </section>
+    </div>
+  </div>
+  <footer>CINELUX ACCESS · DEMO UI<br>La validación y las estadísticas se guardan solo durante esta sesión en el navegador.</footer>
+</main>
+<script>
+(() => {
+  const validTickets = {
+    'CINE-VALIDO-001': {movie:'Noche de estreno', room:'Sala 04', seat:'F-08', time:'7:30 p. m.'},
+    'CINE-VALIDO-002': {movie:'Noche de estreno', room:'Sala 04', seat:'F-09', time:'7:30 p. m.'},
+    'CINE-VALIDO-003': {movie:'Noche de estreno', room:'Sala 04', seat:'F-10', time:'7:30 p. m.'}
+  };
+  const used = new Set();
+  const records = [];
+  let accepted = 0, rejected = 0, scanner = null, busy = false;
+  const $ = id => document.getElementById(id);
+  const status = $('status');
+
+  function showResult(code, isValid, message, ticket) {
+    status.className = 'status show ' + (isValid ? 'valid' : 'invalid');
+    const title = document.createElement('h4');
+    title.textContent = isValid ? '✓ ACCESO PERMITIDO' : '✕ ACCESO DENEGADO';
+    const detail = document.createElement('p');
+    detail.textContent = message;
+    const codeLine = document.createElement('p');
+    codeLine.className = 'sub';
+    codeLine.textContent = 'Código: ' + code;
+    status.replaceChildren(title, detail, codeLine);
+    if (ticket) {
+      const info = document.createElement('p');
+      info.className = 'sub';
+      info.textContent = `${ticket.movie} · ${ticket.room} · Asiento ${ticket.seat} · ${ticket.time}`;
+      status.appendChild(info);
+    }
+  }
+
+  function validate(raw) {
+    const code = String(raw || '').trim();
+    if (!code) {
+      showResult('(vacío)', false, 'Escribe o escanea un código primero.');
+      return;
+    }
+    let ticket = validTickets[code];
+    let isValid = Boolean(ticket) && !used.has(code);
+    let message;
+    if (ticket && used.has(code)) {
+      message = 'Este boleto ya fue utilizado. No se permite una segunda entrada.';
+    } else if (ticket) {
+      used.add(code);
+      message = 'Boleto reconocido. Puede pasar a la sala.';
+    } else {
+      message = 'Código desconocido o inválido. No se encuentra en la lista de prueba.';
+    }
+    if (isValid) accepted++; else rejected++;
+    records.unshift({code, isValid, message, time:new Date().toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit',second:'2-digit'}), ticket});
+    renderStats();
+    renderHistory();
+    showResult(code, isValid, message, ticket);
+    $('manualCode').value = '';
+  }
+
+  function renderStats() {
+    $('total').textContent = String(accepted + rejected);
+    $('accepted').textContent = String(accepted);
+    $('rejected').textContent = String(rejected);
+    $('historyCount').textContent = records.length + (records.length === 1 ? ' registro' : ' registros');
+  }
+  function renderHistory() {
+    const box = $('history');
+    box.replaceChildren();
+    if (!records.length) {
+      const empty = document.createElement('div'); empty.className = 'empty';
+      empty.textContent = 'Todavía no hay entradas escaneadas.'; box.appendChild(empty); return;
+    }
+    records.slice(0,8).forEach(r => {
+      const row = document.createElement('div'); row.className = 'entry';
+      const left = document.createElement('div');
+      const strong = document.createElement('strong'); strong.textContent = r.code;
+      const small = document.createElement('small'); small.textContent = r.time;
+      left.append(strong, small);
+      const badge = document.createElement('span'); badge.className = 'result-pill ' + (r.isValid ? 'ok' : 'no');
+      badge.textContent = r.isValid ? 'PERMITIDO' : 'RECHAZADO';
+      row.append(left, badge); box.appendChild(row);
+    });
+  }
+
+  async function stopCamera(update = true) {
+    if (!scanner) { $('stop').disabled = true; return; }
+    const current = scanner; scanner = null;
+    try { if (current.isScanning) await current.stop(); await current.clear(); } catch (_) {}
+    $('stop').disabled = true;
+    $('start').disabled = false;
+    if (update) $('start').textContent = '▶ Activar cámara';
+  }
+  async function startCamera() {
+    if (busy || scanner) return;
+    if (typeof Html5Qrcode === 'undefined') {
+      showResult('Cámara', false, 'No se pudo cargar la biblioteca del escáner. Comprueba tu conexión a Internet.');
+      return;
+    }
+    busy = true; $('start').disabled = true;
+    try {
+      const instance = new Html5Qrcode('reader');
+      scanner = instance;
+      await instance.start({facingMode:'environment'},
+        {fps:10, qrbox:{width:230,height:230}, aspectRatio:1},
+        decoded => { if (scanner) { validate(decoded); stopCamera(false); } },
+        () => {});
+      $('stop').disabled = false;
+      $('start').textContent = 'Cámara activa';
+    } catch (err) {
+      scanner = null;
+      showResult('Cámara', false, 'No se pudo abrir la cámara. Comprueba el permiso y abre la página por HTTPS o localhost.');
+      $('start').disabled = false;
+      $('start').textContent = '▶ Activar cámara';
+      $('stop').disabled = true;
+    } finally { busy = false; }
+  }
+
+  $('start').addEventListener('click', startCamera);
+  $('stop').addEventListener('click', () => stopCamera());
+  $('checkManual').addEventListener('click', () => validate($('manualCode').value));
+  $('manualCode').addEventListener('keydown', e => { if (e.key === 'Enter') validate($('manualCode').value); });
+  $('good').addEventListener('click', () => {
+    const code = Object.keys(validTickets).find(c => !used.has(c));
+    validate(code || 'CINE-VALIDO-001');
+  });
+  $('bad').addEventListener('click', () => validate('CINE-QR-INVALIDO-999'));
+  $('reset').addEventListener('click', async () => {
+    await stopCamera();
+    used.clear(); records.length = 0; accepted = 0; rejected = 0;
+    renderStats(); renderHistory();
+    status.className = 'status'; status.replaceChildren();
+    $('start').textContent = '▶ Activar cámara';
+  });
+})();
+</script>
+</body>
+</html>
